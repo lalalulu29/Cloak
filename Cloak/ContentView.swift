@@ -21,6 +21,7 @@ struct ContentView: View {
     @AppStorage("eveningHour") private var eveningHour = NotificationSettings.default.eveningHour
     @AppStorage("eveningMinute") private var eveningMinute = NotificationSettings.default.eveningMinute
     @AppStorage("daytimeReminderCount") private var daytimeReminderCount = NotificationSettings.default.daytimeReminderCount
+    @AppStorage("beforeMidnightReminderMinutes") private var beforeMidnightReminderMinutes = NotificationSettings.default.beforeMidnightReminderMinutes
     @AppStorage("numberLength") private var numberLength = 4
 
     @State private var isShowingRevealSheet = false
@@ -246,6 +247,12 @@ struct ContentView: View {
                 )
 
                 Stepper("Дневные напоминания: \(daytimeReminderCount)", value: $daytimeReminderCount, in: 1...5)
+                Stepper(
+                    "Напомнить до полуночи: \(beforeMidnightReminderMinutes) мин",
+                    value: $beforeMidnightReminderMinutes,
+                    in: 5...180,
+                    step: 5
+                )
             }
 
             Section("Тренировка") {
@@ -266,6 +273,7 @@ struct ContentView: View {
         .onChange(of: eveningHour) { _, _ in Task { await scheduleNotifications() } }
         .onChange(of: eveningMinute) { _, _ in Task { await scheduleNotifications() } }
         .onChange(of: daytimeReminderCount) { _, _ in Task { await scheduleNotifications() } }
+        .onChange(of: beforeMidnightReminderMinutes) { _, _ in Task { await scheduleNotifications() } }
         .onChange(of: numberLength) { _, _ in
             applyNumberLengthForNearestUnstartedPeriod()
         }
@@ -368,7 +376,8 @@ struct ContentView: View {
             morningMinute: morningMinute,
             eveningHour: eveningHour,
             eveningMinute: eveningMinute,
-            daytimeReminderCount: daytimeReminderCount
+            daytimeReminderCount: daytimeReminderCount,
+            beforeMidnightReminderMinutes: beforeMidnightReminderMinutes
         )
         await NotificationScheduler.scheduleAll(settings: settings)
     }

@@ -38,11 +38,13 @@ The idea comes from a real-life habit: remembering your cloakroom number.
 - Local notifications:
   - morning,
   - daytime reminders,
-  - evening.
+  - evening,
+  - reminder before midnight (configurable in minutes).
 - Settings:
   - notification status,
   - start/end of day,
   - reminder count (`1...5`),
+  - reminder time before midnight (`5...180` minutes),
   - number length (`3...8`, default `4`).
 
 ## Product Rules

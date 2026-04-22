@@ -7,19 +7,22 @@ struct NotificationSettings {
     var eveningHour: Int
     var eveningMinute: Int
     var daytimeReminderCount: Int
+    var beforeMidnightReminderMinutes: Int
 
     static let `default` = NotificationSettings(
         morningHour: 9,
         morningMinute: 0,
         eveningHour: 21,
         eveningMinute: 0,
-        daytimeReminderCount: 2
+        daytimeReminderCount: 2,
+        beforeMidnightReminderMinutes: 60
     )
 }
 
 enum NotificationScheduler {
     static let morningIdentifier = "cloak.morning"
     static let eveningIdentifier = "cloak.evening"
+    static let beforeMidnightIdentifier = "cloak.beforeMidnight"
     static let daytimePrefix = "cloak.daytime."
 
     static func requestPermission() async -> Bool {
@@ -39,12 +42,13 @@ enum NotificationScheduler {
     static func scheduleAll(settings: NotificationSettings) async {
         let center = UNUserNotificationCenter.current()
 
-        var identifiers = [morningIdentifier, eveningIdentifier]
+        var identifiers = [morningIdentifier, eveningIdentifier, beforeMidnightIdentifier]
         identifiers.append(contentsOf: (0..<max(0, settings.daytimeReminderCount)).map { daytimePrefix + String($0) })
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
 
         await scheduleMorning(center: center, settings: settings)
         await scheduleEvening(center: center, settings: settings)
+        await scheduleBeforeMidnight(center: center, settings: settings)
         await scheduleDaytime(center: center, settings: settings)
     }
 
@@ -120,6 +124,28 @@ enum NotificationScheduler {
             } catch {
                 // Ignore scheduling error for MVP.
             }
+        }
+    }
+
+    private static func scheduleBeforeMidnight(center: UNUserNotificationCenter, settings: NotificationSettings) async {
+        let minutesBeforeMidnight = max(1, min(1439, settings.beforeMidnightReminderMinutes))
+        let targetMinutes = (24 * 60) - minutesBeforeMidnight
+
+        let content = UNMutableNotificationContent()
+        content.title = "Скоро конец суток"
+        content.body = "Если еще не ввел число, сделай это до полуночи"
+        content.sound = .default
+
+        var components = DateComponents()
+        components.hour = targetMinutes / 60
+        components.minute = targetMinutes % 60
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: beforeMidnightIdentifier, content: content, trigger: trigger)
+
+        do {
+            try await center.add(request)
+        } catch {
+            // Ignore scheduling error for MVP.
         }
     }
 }
