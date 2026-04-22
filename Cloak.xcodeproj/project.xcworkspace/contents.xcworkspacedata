@@ -4,4 +4,23 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <Group
+      location = "group:Docs"
+      name = "Docs">
+      <FileRef
+         location = "group:PRODUCT_VISION.md">
+      </FileRef>
+      <FileRef
+         location = "group:MVP_IMPLEMENTATION_PLAN.md">
+      </FileRef>
+      <FileRef
+         location = "group:PRD_CHECKLIST.md">
+      </FileRef>
+      <FileRef
+         location = "group:TASKS.md">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
 </Workspace>
